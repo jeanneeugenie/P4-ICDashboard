@@ -14,7 +14,7 @@ from dashboard import server as server_mod
 TILE_ROWS = 4
 TILE_COLS = 4
 TILE_SIZE = (128, 128)  # width, height in pixels
-REFRESH_MS = 50         # GUI refresh period (ms)
+REFRESH_MS = 16         # GUI refresh period (ms) -> ~60 FPS polling
 
 
 class DashboardGUI:
@@ -28,6 +28,9 @@ class DashboardGUI:
 
         # Keep references to PhotoImage objects so they don't get GC'd
         self.tile_images = [None] * (TILE_ROWS * TILE_COLS)
+        # Track the last snapshot update time so we can skip expensive
+        # image/plot work when nothing new arrived (standby case).
+        self._last_snapshot_time = None
 
         # ---- Layout ----
         main_frame = ttk.Frame(root, padding=10)
@@ -111,7 +114,7 @@ class DashboardGUI:
         if last_update_time is not None:
             latency_ms = (now - last_update_time) * 1000.0
 
-        # Update info text
+        # Update info text (cheap) every frame so FPS/latency look smooth
         self.info_label.config(
             text=(
                 f"iter: {batch.iteration}   "
@@ -121,36 +124,44 @@ class DashboardGUI:
             )
         )
 
-        # Update 16 tiles
-        for i, img_msg in enumerate(batch.images):
-            if i >= TILE_ROWS * TILE_COLS:
-                break
+        # Only perform expensive image/plot updates when the snapshot changed.
+        # This avoids Image.open/resize/PhotoImage creation every frame while
+        # the app is idle, allowing the UI to poll at ~60 FPS cheaply.
+        need_update = (last_update_time != self._last_snapshot_time)
+        if need_update:
+            # Update 16 tiles
+            for i, img_msg in enumerate(batch.images):
+                if i >= TILE_ROWS * TILE_COLS:
+                    break
 
-            img = Image.open(io.BytesIO(img_msg.image_data))
-            img = img.resize(TILE_SIZE)
-            photo = ImageTk.PhotoImage(img)
+                img = Image.open(io.BytesIO(img_msg.image_data))
+                img = img.resize(TILE_SIZE)
+                photo = ImageTk.PhotoImage(img)
 
-            self.image_labels[i].config(image=photo)
-            self.image_labels[i].image = photo     # keep reference
+                self.image_labels[i].config(image=photo)
+                self.image_labels[i].image = photo     # keep reference
 
-            self.text_labels[i].config(
-                text=f"pred: {img_msg.predicted_label} / true: {img_msg.true_label}"
-            )
+                self.text_labels[i].config(
+                    text=f"pred: {img_msg.predicted_label} / true: {img_msg.true_label}"
+                )
 
-        # If fewer than 16, clear the rest
-        for j in range(len(batch.images), TILE_ROWS * TILE_COLS):
-            self.image_labels[j].config(image="")
-            self.image_labels[j].image = None
-            self.text_labels[j].config(text="(empty)")
+            # If fewer than 16, clear the rest
+            for j in range(len(batch.images), TILE_ROWS * TILE_COLS):
+                self.image_labels[j].config(image="")
+                self.image_labels[j].image = None
+                self.text_labels[j].config(text="(empty)")
 
-        # Update loss plot
-        if history:
-            iters = [p[0] for p in history]
-            losses = [p[1] for p in history]
-            self.loss_line.set_data(iters, losses)
-            self.ax.relim()
-            self.ax.autoscale_view()
-            self.canvas.draw_idle()
+            # Update loss plot
+            if history:
+                iters = [p[0] for p in history]
+                losses = [p[1] for p in history]
+                self.loss_line.set_data(iters, losses)
+                self.ax.relim()
+                self.ax.autoscale_view()
+                self.canvas.draw_idle()
+
+            # record we processed this snapshot
+            self._last_snapshot_time = last_update_time
 
 
 def main():
