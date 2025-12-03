@@ -44,16 +44,54 @@ def make_dataloader():
     return loader, train_dataset.classes  # label names
 
 
-def generate_training_batches(model, loader, label_names, device):
-    """
-    Generator that runs a real training loop and yields TrainingBatch messages.
-    """
+def main():
+    # device
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    print("[train] Using device:", device)
+
+    # data
+    loader, label_names = make_dataloader()
+
+    # model
+    model = SimpleCNN(num_classes=len(label_names)).to(device)
+
+    # loss & optimizer
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=1e-3)
 
-    iteration = 0
-    model.train()
+    # gRPC channel + stub
+    channel = grpc.insecure_channel("localhost:50051")
+    stub = dashboard_pb2_grpc.DashboardServiceStub(channel)
 
+    dashboard_online = True  # will flip to False if we lose connection
+
+    # helper to send a single batch (as a 1-element stream)
+    def send_batch_to_dashboard(batch_msg):
+        nonlocal dashboard_online
+        if not dashboard_online:
+            return
+
+        try:
+            # iter([batch_msg]) creates a one-element "stream"
+            ack = stub.StreamTraining(iter([batch_msg]))
+            # you can optionally check ack.ok here
+        except grpc.RpcError as e:
+            print("[train] Dashboard connection lost, disabling streaming.")
+            print("        Error:", e)
+            dashboard_online = False
+
+    # Optional thing but here's quick Ping (also fault-tolerant)
+    try:
+        hb = dashboard_pb2.Heartbeat(timestamp_ms=int(time.time() * 1000))
+        ack = stub.Ping(hb)
+        print("[train] Ping ack:", ack.ok, ack.message)
+    except grpc.RpcError as e:
+        print("[train] Could not reach dashboard on Ping, will train offline.")
+        print("        Error:", e)
+        dashboard_online = False
+
+    iteration = 0
+    print("[train] Starting training loop...")
     for epoch in range(NUM_EPOCHS):
         print(f"[train] Epoch {epoch+1}/{NUM_EPOCHS}")
         for images, labels in loader:
@@ -78,14 +116,13 @@ def generate_training_batches(model, loader, label_names, device):
             batch_msg = dashboard_pb2.TrainingBatch()
             batch_msg.iteration = iteration
             batch_msg.loss = float(loss.item())
-            batch_msg.fps = 0.0  # dashboard will compute its own FPS if you want
+            batch_msg.fps = 0.0  # dashboard computes its own FPS
 
             # choose up to NUM_TILES images
             batch_size = images.size(0)
             num_tiles = min(NUM_TILES, batch_size)
             indices = random.sample(range(batch_size), k=num_tiles)
 
-            # move to CPU for image save
             images_cpu = images.detach().cpu()
             labels_cpu = labels.detach().cpu()
             preds_cpu = preds.detach().cpu()
@@ -99,12 +136,13 @@ def generate_training_batches(model, loader, label_names, device):
 
             print(
                 f"[train] iter={iteration}, loss={batch_msg.loss:.4f}, "
-                f"tiles={num_tiles}"
+                f"tiles={num_tiles}, dashboard_online={dashboard_online}"
             )
 
-            yield batch_msg
+            # send to dashboard (if still online)
+            send_batch_to_dashboard(batch_msg)
 
-            # simulate a bit of delay (optional)
+            # simulate a bit of delay (optional, to control pace)
             elapsed = time.time() - start_time
             target_step_time = 0.1  # seconds
             if elapsed < target_step_time:
@@ -112,33 +150,7 @@ def generate_training_batches(model, loader, label_names, device):
 
             iteration += 1
 
-
-def main():
-    # device
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    print("[train] Using device:", device)
-
-    # data
-    loader, label_names = make_dataloader()
-
-    # model
-    model = SimpleCNN(num_classes=len(label_names)).to(device)
-
-    # gRPC channel
-    channel = grpc.insecure_channel("localhost:50051")
-    stub = dashboard_pb2_grpc.DashboardServiceStub(channel)
-
-    # Optional: quick Ping
-    hb = dashboard_pb2.Heartbeat(timestamp_ms=int(time.time() * 1000))
-    ack = stub.Ping(hb)
-    print("[train] Ping ack:", ack.ok, ack.message)
-
-    # Stream real training batches
-    print("[train] Starting training + streaming...")
-    ack2 = stub.StreamTraining(
-        generate_training_batches(model, loader, label_names, device)
-    )
-    print("[train] StreamTraining finished:", ack2.ok, ack2.message)
+    print("[train] Training finished.")
 
 
 if __name__ == "__main__":
