@@ -1,2 +1,3 @@
 .vs
-__psycache__
+dashboard\__pycache__
+data\
