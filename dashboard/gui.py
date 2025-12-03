@@ -1,8 +1,11 @@
 import io
+import time
 import tkinter as tk
 from tkinter import ttk
 
 from PIL import Image, ImageTk
+from matplotlib.figure import Figure
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 from dashboard import server as server_mod
 
@@ -11,13 +14,17 @@ from dashboard import server as server_mod
 TILE_ROWS = 4
 TILE_COLS = 4
 TILE_SIZE = (128, 128)  # width, height in pixels
-REFRESH_MS = 100        # how often it check for new batches
+REFRESH_MS = 50         # GUI refresh period (ms)
 
 
 class DashboardGUI:
     def __init__(self, root):
         self.root = root
         self.root.title("Image Classifier Dashboard")
+
+        # FPS tracking
+        self.last_frame_time = None
+        self.current_fps = 0.0
 
         # Keep references to PhotoImage objects so they don't get GC'd
         self.tile_images = [None] * (TILE_ROWS * TILE_COLS)
@@ -31,13 +38,20 @@ class DashboardGUI:
 
         # Frames
         self.image_frame = ttk.Frame(main_frame)
-        self.image_frame.grid(row=0, column=0, padx=5, pady=5)
+        self.image_frame.grid(row=0, column=0, padx=5, pady=5, sticky="n")
 
         self.text_frame = ttk.Frame(main_frame)
-        self.text_frame.grid(row=1, column=0, padx=5, pady=5)
+        self.text_frame.grid(row=1, column=0, padx=5, pady=5, sticky="n")
 
         self.info_frame = ttk.Frame(main_frame)
         self.info_frame.grid(row=2, column=0, padx=5, pady=5, sticky="w")
+
+        self.plot_frame = ttk.Frame(main_frame)
+        self.plot_frame.grid(row=0, column=1, rowspan=3, padx=5, pady=5, sticky="nsew")
+
+        main_frame.columnconfigure(0, weight=0)
+        main_frame.columnconfigure(1, weight=1)
+        main_frame.rowconfigure(0, weight=1)
 
         # 16 image labels
         self.image_labels = []
@@ -55,9 +69,21 @@ class DashboardGUI:
                 lbl.grid(row=r, column=c, padx=2, pady=2)
                 self.text_labels.append(lbl)
 
-        # Info label for iteration / loss
-        self.info_label = ttk.Label(self.info_frame, text="iter: -  loss: -")
+        # Info label for iteration / loss / FPS / latency
+        self.info_label = ttk.Label(self.info_frame, text="iter: -  loss: -  fps: -  latency: - ms")
         self.info_label.grid(row=0, column=0, sticky="w")
+
+        # ---- Matplotlib loss plot ----
+        self.fig = Figure(figsize=(4, 3), dpi=100)
+        self.ax = self.fig.add_subplot(111)
+        self.ax.set_title("Training Loss")
+        self.ax.set_xlabel("Iteration")
+        self.ax.set_ylabel("Loss")
+        self.loss_line, = self.ax.plot([], [], lw=1)
+
+        self.canvas = FigureCanvasTkAgg(self.fig, master=self.plot_frame)
+        self.canvas_widget = self.canvas.get_tk_widget()
+        self.canvas_widget.pack(fill=tk.BOTH, expand=True)
 
         # Start periodic refresh
         self.schedule_refresh()
@@ -67,13 +93,32 @@ class DashboardGUI:
         self.root.after(REFRESH_MS, self.schedule_refresh)
 
     def refresh_from_state(self):
-        batch = server_mod.state.get()
+        # FPS
+        now = time.time()
+        if self.last_frame_time is not None:
+            dt = now - self.last_frame_time
+            if dt > 0:
+                # simple moving FPS: clamp to avoid insane spikes
+                self.current_fps = 0.9 * self.current_fps + 0.1 * (1.0 / dt)
+        self.last_frame_time = now
+
+        batch, history, last_update_time = server_mod.state.get_snapshot()
         if batch is None:
             return
 
+        # latency = time since last batch arrived
+        latency_ms = 0.0
+        if last_update_time is not None:
+            latency_ms = (now - last_update_time) * 1000.0
+
         # Update info text
         self.info_label.config(
-            text=f"iter: {batch.iteration}   loss: {batch.loss:.4f}"
+            text=(
+                f"iter: {batch.iteration}   "
+                f"loss: {batch.loss:.4f}   "
+                f"fps: {self.current_fps:5.1f}   "
+                f"latency: {latency_ms:5.1f} ms"
+            )
         )
 
         # Update 16 tiles
@@ -97,6 +142,15 @@ class DashboardGUI:
             self.image_labels[j].config(image="")
             self.image_labels[j].image = None
             self.text_labels[j].config(text="(empty)")
+
+        # Update loss plot
+        if history:
+            iters = [p[0] for p in history]
+            losses = [p[1] for p in history]
+            self.loss_line.set_data(iters, losses)
+            self.ax.relim()
+            self.ax.autoscale_view()
+            self.canvas.draw_idle()
 
 
 def main():

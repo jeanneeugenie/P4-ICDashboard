@@ -1,7 +1,16 @@
 {
   "Version": 1,
   "WorkspaceRootPath": "C:\\Users\\Jeanne Eugenie\\Documents\\GitHub\\P4-ICDashboard\\",
-  "Documents": [],
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Jeanne Eugenie\\Documents\\GitHub\\P4-ICDashboard\\dashboard\\GUI.py||{3B902123-F8A7-4915-9F01-361F908088D0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:dashboard\\GUI.py||{3B902123-F8A7-4915-9F01-361F908088D0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Jeanne Eugenie\\Documents\\GitHub\\P4-ICDashboard\\dashboard\\server.py||{3B902123-F8A7-4915-9F01-361F908088D0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:dashboard\\server.py||{3B902123-F8A7-4915-9F01-361F908088D0}"
+    }
+  ],
   "DocumentGroupContainers": [
     {
       "Orientation": 0,
@@ -9,11 +18,41 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": -1,
+          "SelectedChildIndex": 2,
           "Children": [
             {
               "$type": "Bookmark",
               "Name": "ST:0:0:{34e76e81-ee4a-11d0-ae2e-00a0c90fffc3}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:128:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "GUI.py",
+              "DocumentMoniker": "C:\\Users\\Jeanne Eugenie\\Documents\\GitHub\\P4-ICDashboard\\dashboard\\GUI.py",
+              "RelativeDocumentMoniker": "dashboard\\GUI.py",
+              "ToolTip": "C:\\Users\\Jeanne Eugenie\\Documents\\GitHub\\P4-ICDashboard\\dashboard\\GUI.py",
+              "RelativeToolTip": "dashboard\\GUI.py",
+              "ViewState": "AgIAABgAAAAAAAAAAAAAAHEAAAAAAAAAAAAAAA==",
+              "Icon": "00000000-0000-0000-0000-000000000000.000000|iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAM5SURBVEhLtVVNSFRRFD7z85yGyZnUYZwxIrGUsCRSSrFFJlQriSCKCBdBLmZTlKCBi8xVzc5NiyREIqJVC6FctCgy6sWggyAVWDOpTaWpozO9mTfv53bue3fGMX3yLPrg45x33r3n3Pvd8\u002B6D/wpCiIW5eXR0dBDmmsXhgYGBMPPXYcMC/f397Glz9PT0SKIoTkuSdBGL8Cy8BlZm/woej4fr6uoq5TjuIS6skYXXwLAAz/OGLITP5yspKNLAwsagEgmCYIq9vb15PxqNLgaDwSmcv4el0vBPElGEQiGNQ0NDJTabzY\u002BhOv2NDjuz6/CnFIVobNTlRmk0m8Pg4GA4EomwJx2GO6BJNmJTUxOg3iAoFphNZCG2mIGltAp2u50euoNNz8NwB0ZYEUS4PfIeYvMrIKRFUGQZKUG52wF9504eGh8f59hQDVvuolhChjIXB6Hz9Sy5zpn5ZRgOf3G0tLTUsBQatiyRqhJ4/eEbdD54A6qiIGXdYpGUkIHi4uLtLIWGTbtIwYmUFqsVwtMpePQuDmPRn3C81g/NNT44UVcBnI2Ow13QIqoKx\u002BoTN0jyGSHS3CheRaWmuijhrob7L6byeq9Ko/t09ZolKoDwSp\u002BUmTwK3s6bpiQamYizVVLSXeX81RiVqrqczsS7UslggY8A8o/Tm0qUw\u002Bx8UltljjZcaaXXBVXlbqjyu2FvwANnmqvgQsMnTCpggTQSbTa\u002B2/A2LZToDi\u002BBLFE5JNhZ4oR77SI4yRS\u002Byd3saKU4Jk8BqCIyiwXQ\u002BrvNdVEF9jiVgEoRbHWBU3qJyb4iMak0CyB\u002BRrvMVo7M7aJo15IpiVoPBPKH6dkmsyhClXQpZJa40HdUA3CBJ6Ykoki7KyG\u002BkIS2g2nwkceYhElRVIu/LbwhCC2MTWl1ocXe3XFqDuzeI6b/aFb8FiwWCxSp2B0Ld/XkVG8FLVHQx3Nw4SVY0X0Lh48ieRyfNCURBf2I6BkQ7KFVrZksZZcBvJdwFU5tLCZ\u002BTpNrvhYpAN0BczfE9WtXJ/f53u6HxFO9SG4XrnqQAn1ZzuE5i8mH2fCtAz9/G/IKkZMR8mtCJqkxQrLfYxjjke3INjYUAfAb47MfvRyFLYgAAAAASUVORK5CYII=",
+              "WhenOpened": "2025-12-03T09:26:04.083Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "server.py",
+              "DocumentMoniker": "C:\\Users\\Jeanne Eugenie\\Documents\\GitHub\\P4-ICDashboard\\dashboard\\server.py",
+              "RelativeDocumentMoniker": "dashboard\\server.py",
+              "ToolTip": "C:\\Users\\Jeanne Eugenie\\Documents\\GitHub\\P4-ICDashboard\\dashboard\\server.py",
+              "RelativeToolTip": "dashboard\\server.py",
+              "ViewState": "AgIAABkAAAAAAAAAAAAUwDEAAAAAAAAAAAAAAA==",
+              "Icon": "00000000-0000-0000-0000-000000000000.000000|iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAM5SURBVEhLtVVNSFRRFD7z85yGyZnUYZwxIrGUsCRSSrFFJlQriSCKCBdBLmZTlKCBi8xVzc5NiyREIqJVC6FctCgy6sWggyAVWDOpTaWpozO9mTfv53bue3fGMX3yLPrg45x33r3n3Pvd8\u002B6D/wpCiIW5eXR0dBDmmsXhgYGBMPPXYcMC/f397Glz9PT0SKIoTkuSdBGL8Cy8BlZm/woej4fr6uoq5TjuIS6skYXXwLAAz/OGLITP5yspKNLAwsagEgmCYIq9vb15PxqNLgaDwSmcv4el0vBPElGEQiGNQ0NDJTabzY\u002BhOv2NDjuz6/CnFIVobNTlRmk0m8Pg4GA4EomwJx2GO6BJNmJTUxOg3iAoFphNZCG2mIGltAp2u50euoNNz8NwB0ZYEUS4PfIeYvMrIKRFUGQZKUG52wF9504eGh8f59hQDVvuolhChjIXB6Hz9Sy5zpn5ZRgOf3G0tLTUsBQatiyRqhJ4/eEbdD54A6qiIGXdYpGUkIHi4uLtLIWGTbtIwYmUFqsVwtMpePQuDmPRn3C81g/NNT44UVcBnI2Ow13QIqoKx\u002BoTN0jyGSHS3CheRaWmuijhrob7L6byeq9Ko/t09ZolKoDwSp\u002BUmTwK3s6bpiQamYizVVLSXeX81RiVqrqczsS7UslggY8A8o/Tm0qUw\u002Bx8UltljjZcaaXXBVXlbqjyu2FvwANnmqvgQsMnTCpggTQSbTa\u002B2/A2LZToDi\u002BBLFE5JNhZ4oR77SI4yRS\u002Byd3saKU4Jk8BqCIyiwXQ\u002BrvNdVEF9jiVgEoRbHWBU3qJyb4iMak0CyB\u002BRrvMVo7M7aJo15IpiVoPBPKH6dkmsyhClXQpZJa40HdUA3CBJ6Ykoki7KyG\u002BkIS2g2nwkceYhElRVIu/LbwhCC2MTWl1ocXe3XFqDuzeI6b/aFb8FiwWCxSp2B0Ld/XkVG8FLVHQx3Nw4SVY0X0Lh48ieRyfNCURBf2I6BkQ7KFVrZksZZcBvJdwFU5tLCZ\u002BTpNrvhYpAN0BczfE9WtXJ/f53u6HxFO9SG4XrnqQAn1ZzuE5i8mH2fCtAz9/G/IKkZMR8mtCJqkxQrLfYxjjke3INjYUAfAb47MfvRyFLYgAAAAASUVORK5CYII=",
+              "WhenOpened": "2025-12-03T09:18:27.048Z",
+              "EditorCaption": ""
             }
           ]
         }

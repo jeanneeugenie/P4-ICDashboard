@@ -8,20 +8,35 @@ from proto import dashboard_pb2, dashboard_pb2_grpc
 
 class DashboardState:
     """
-    Shared state where we keep the most recent batch.
+    Shared state where we keep the most recent batch and loss history.
     The GUI will read from here.
     """
-    def __init__(self):
+    def __init__(self, max_points=500):
         self.lock = threading.Lock()
         self.last_batch = None
+        self.loss_history = []        # list of (iteration, loss)
+        self.last_update_time = None  # when we last received a batch (time.time())
+        self.max_points = max_points
 
     def update(self, batch):
+        now = time.time()
         with self.lock:
             self.last_batch = batch
+            self.last_update_time = now
+            self.loss_history.append((batch.iteration, batch.loss))
+            # keep only the last N points
+            if len(self.loss_history) > self.max_points:
+                self.loss_history = self.loss_history[-self.max_points:]
 
-    def get(self):
+    def get_snapshot(self):
+        """
+        Return a copy of the current state for the GUI: (batch, history, last_time).
+        """
         with self.lock:
-            return self.last_batch
+            batch = self.last_batch
+            history = list(self.loss_history)
+            last_time = self.last_update_time
+        return batch, history, last_time
 
 
 state = DashboardState()
