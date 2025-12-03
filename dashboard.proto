@@ -1,0 +1,49 @@
+syntax = "proto3";
+
+package icdash; //image classifier dashboard
+
+// ---------------- MESSAGES ----------------
+
+// One image in the batch
+message TrainingImage {
+  int32 id = 1;                    // index in the batch
+  bytes image_data = 2;            // raw bytes (e.g., PNG/JPEG)
+  string predicted_label = 3;      // model prediction
+  string true_label = 4;           // ground-truth label
+}
+
+// A batch update sent after every (or every N) iterations
+message TrainingBatch {
+  int32 iteration = 1;             // training iteration / step
+  repeated TrainingImage images = 2; // up to 16 images for the tile view
+  float loss = 3;                  // training loss at this iteration
+  float fps = 4;                   // dashboard-computed or reported FPS
+}
+
+// Empty message for simple RPCs
+message Empty {}
+
+// Acknowledgement from the dashboard
+message Ack {
+  bool ok = 1;
+  string message = 2;
+}
+
+// Heartbeat for fault tolerance / reconnection logic
+message Heartbeat {
+  int64 timestamp_ms = 1;
+}
+
+// ---------------- SERVICE ----------------
+
+service DashboardService {
+  // Main RPC: the training process streams batches to the dashboard.
+  rpc StreamTraining (stream TrainingBatch) returns (Ack);
+
+  // Optional: simple ping to check connectivity.
+  rpc Ping (Heartbeat) returns (Ack);
+}
+
+
+
+
