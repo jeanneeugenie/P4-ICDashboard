@@ -9,7 +9,7 @@ from proto import dashboard_pb2, dashboard_pb2_grpc
 class DashboardState:
     """
     Shared state where we keep the most recent batch.
-    Later the GUI will read from here.
+    The GUI will read from here.
     """
     def __init__(self):
         self.lock = threading.Lock()
@@ -49,12 +49,20 @@ class DashboardServiceImpl(dashboard_pb2_grpc.DashboardServiceServicer):
         return dashboard_pb2.Ack(ok=True, message="pong from dashboard server")
 
 
-def serve():
+def _make_server():
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     dashboard_pb2_grpc.add_DashboardServiceServicer_to_server(
         DashboardServiceImpl(), server
     )
     server.add_insecure_port("[::]:50051")
+    return server
+
+
+def serve():
+    """
+    Blocking version: run only the gRPC server (no GUI).
+    """
+    server = _make_server()
     server.start()
     print("[server] Dashboard server listening on port 50051")
 
@@ -64,6 +72,28 @@ def serve():
     except KeyboardInterrupt:
         print("[server] Shutting down...")
         server.stop(0)
+
+
+def start_server_in_thread():
+    """
+    Non-blocking version: start gRPC server in a background thread.
+    Used by the GUI.
+    """
+    server = _make_server()
+    server.start()
+    print("[server] Dashboard server listening on port 50051 (background)")
+
+    def keep_alive():
+        try:
+            while True:
+                time.sleep(86400)
+        except KeyboardInterrupt:
+            print("[server-thread] Shutting down...")
+            server.stop(0)
+
+    t = threading.Thread(target=keep_alive, daemon=True)
+    t.start()
+    return server
 
 
 if __name__ == "__main__":
