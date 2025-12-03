@@ -1,8 +1,8 @@
 {
   "ExpandedNodes": [
     "",
-    "\\dashboard"
+    "\\training"
   ],
-  "SelectedNode": "\\dashboard\\gui.py",
+  "SelectedNode": "\\training\\model.py",
   "PreviewInSolutionExplorer": false
 }
